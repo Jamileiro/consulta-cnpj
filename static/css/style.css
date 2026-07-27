@@ -1,0 +1,498 @@
+/* ============================================
+   ConsultaCNPJ - Custom Styles
+   ============================================ */
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Touch targets mínimos para mobile */
+button,
+input,
+select,
+textarea {
+  min-height: 44px;
+}
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+/* Animações de entrada */
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Toast de notificação */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 12px 24px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease-out;
+  pointer-events: none;
+}
+.toast-success {
+  background: #059669;
+  color: #fff;
+}
+.toast-error {
+  background: #dc2626;
+  color: #fff;
+}
+
+/* Cards de resumo */
+.summary-card {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+.dark .summary-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   Acordeão (Accordion) Styles
+   ============================================ */
+.accordion-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.accordion-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  transition: box-shadow 0.2s ease;
+}
+.dark .accordion-item {
+  border-color: #334155;
+  background: #1e293b;
+}
+.accordion-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.dark .accordion-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 18px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #64748b;
+  text-align: left;
+  min-height: 48px;
+  transition:
+    color 0.2s,
+    background 0.2s;
+  user-select: none;
+}
+.dark .accordion-header {
+  color: #94a3b8;
+}
+.accordion-header:hover {
+  background: #f8fafc;
+}
+.dark .accordion-header:hover {
+  background: #0f172a;
+}
+
+.accordion-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition:
+    background 0.2s,
+    transform 0.3s,
+    color 0.2s;
+}
+.dark .accordion-icon {
+  background: #334155;
+  color: #94a3b8;
+}
+.accordion-header:hover .accordion-icon {
+  background: #cbd5e1;
+}
+.dark .accordion-header:hover .accordion-icon {
+  background: #475569;
+}
+.accordion-item.is-open .accordion-icon {
+  transform: rotate(45deg);
+  background: #0284c7;
+  color: #fff;
+}
+.dark .accordion-item.is-open .accordion-icon {
+  background: #0ea5e9;
+  color: #fff;
+}
+
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition:
+    max-height 0.35s ease,
+    padding 0.35s ease;
+  padding: 0 18px;
+}
+.accordion-item.is-open .accordion-body {
+  max-height: 2000px;
+  padding: 0 18px 18px 18px;
+}
+
+.accordion-body-inner {
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #334155;
+}
+.dark .accordion-body-inner {
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+/* Sub-acordeão (aninhado) */
+.accordion-container .accordion-container {
+  margin-top: 8px;
+  gap: 8px;
+}
+.accordion-container .accordion-container .accordion-item {
+  border-radius: 12px;
+  border-color: #e2e8f0;
+}
+.dark .accordion-container .accordion-container .accordion-item {
+  border-color: #475569;
+}
+.accordion-container .accordion-container .accordion-header {
+  padding: 10px 14px;
+  font-size: 0.7rem;
+}
+.accordion-container .accordion-container .accordion-body {
+  padding: 0 14px;
+}
+.accordion-container
+  .accordion-container
+  .accordion-item.is-open
+  .accordion-body {
+  padding: 0 14px 14px 14px;
+}
+.accordion-container .accordion-container .accordion-icon {
+  width: 24px;
+  height: 24px;
+  font-size: 0.9rem;
+}
+
+/* Valor simples dentro do acordeão */
+.accordion-value {
+  display: block;
+  padding: 6px 0;
+  font-size: 0.875rem;
+  color: #0f172a;
+  word-break: break-word;
+}
+.dark .accordion-value {
+  color: #e2e8f0;
+}
+
+/* Lista items dentro do acordeão */
+.accordion-list-item {
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+.dark .accordion-list-item {
+  background: #0f172a;
+  border-color: #334155;
+}
+.accordion-list-item:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   Tooltip
+   ============================================ */
+.field-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: help;
+}
+.field-tooltip .tooltip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #94a3b8;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.dark .field-tooltip .tooltip-icon {
+  background: #64748b;
+}
+.field-tooltip .tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  padding: 8px 12px;
+  border-radius: 10px;
+  white-space: nowrap;
+  max-width: 260px;
+  white-space: normal;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  transition:
+    opacity 0.2s,
+    visibility 0.2s;
+  pointer-events: none;
+}
+.dark .field-tooltip .tooltip-text {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+.field-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+.field-tooltip .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1e293b;
+}
+.dark .field-tooltip .tooltip-text::after {
+  border-top-color: #0f172a;
+}
+
+/* ============================================
+   Badge de Situação
+   ============================================ */
+.situacao-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.situacao-ativa {
+  background: #d1fae5;
+  color: #065f46;
+}
+.dark .situacao-ativa {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+.situacao-baixada,
+.situacao-inapta {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.dark .situacao-baixada,
+.dark .situacao-inapta {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+.situacao-suspensa,
+.situacao-nula {
+  background: #fef3c7;
+  color: #92400e;
+}
+.dark .situacao-suspensa,
+.dark .situacao-nula {
+  background: #78350f;
+  color: #fcd34d;
+}
+
+/* ============================================
+   Link de campo
+   ============================================ */
+.field-link {
+  color: #0284c7;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+}
+.dark .field-link {
+  color: #38bdf8;
+}
+.field-link:hover {
+  color: #0369a1;
+}
+.dark .field-link:hover {
+  color: #7dd3fc;
+}
+
+/* ============================================
+   Print Styles (PDF Export)
+   ============================================ */
+@media print {
+  @page {
+    margin: 15mm;
+    size: A4;
+  }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  #app {
+    padding: 0 !important;
+  }
+  main {
+    max-width: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #fff !important;
+    padding: 0 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .print-header {
+    margin-bottom: 16px;
+  }
+  .print-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  .print-header p {
+    font-size: 0.875rem;
+    color: #475569;
+    margin: 4px 0;
+  }
+  .print-header hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 8px 0;
+  }
+  .summary-card {
+    break-inside: avoid;
+    border: 1px solid #e2e8f0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+  .summary-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .accordion-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #e2e8f0 !important;
+    background: #fff !important;
+  }
+  .accordion-body {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 18px 18px 18px !important;
+  }
+  .accordion-icon {
+    display: none !important;
+  }
+  footer {
+    display: none !important;
+  }
+  .toast {
+    display: none !important;
+  }
+}
+
+.print-only {
+  display: none;
+}

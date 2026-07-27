@@ -1,0 +1,9 @@
+# ConsultaCNPJ - Sem dependências externas!
+# A aplicação usa apenas módulos nativos do Python:
+# - http.server
+# - urllib.request
+# - json
+# - os, sys
+#
+# Para rodar: python app.py
+
