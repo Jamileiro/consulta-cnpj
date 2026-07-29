@@ -21,6 +21,8 @@
   const themeToggle = $("theme-toggle");
   const offlineBadge = $("offline-badge");
   const printCnpj = $("print-cnpj");
+  const serverStatus = $("server-status");
+  const startServerBtn = $("start-server-btn");
 
   // =============================================
   // State
@@ -174,11 +176,25 @@
   updateOnline();
 
   // =============================================
-  // CNPJ Input Mask
+  // CNPJ Input Mask (corrigido: preserva cursor)
   // =============================================
   cnpjInput.addEventListener("input", function () {
-    const raw = cleanDigits(this.value);
-    this.value = formatCnpj(raw);
+    const start = this.selectionStart;
+    const rawDigits = cleanDigits(this.value);
+
+    if (rawDigits.length === 0) {
+      this.value = "";
+      return;
+    }
+
+    const oldLength = this.value.length;
+    this.value = formatCnpj(rawDigits);
+    const newLength = this.value.length;
+
+    let newPos = start + (newLength - oldLength);
+    if (newPos < 0) newPos = 0;
+    if (newPos > this.value.length) newPos = this.value.length;
+    this.setSelectionRange(newPos, newPos);
   });
   cnpjInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
@@ -215,6 +231,83 @@
   }
 
   // =============================================
+  // API Base URL detection
+  // =============================================
+  function getApiBase() {
+    var port = parseInt(window.location.port);
+    if (!isNaN(port) && port >= 5500 && port <= 5510) {
+      // Está no Live Server: API em porta 5000
+      return (
+        window.location.protocol + "//" + window.location.hostname + ":5000"
+      );
+    }
+    // Já está no servidor Python (porta 5000)
+    return "";
+  }
+
+  function checkServerStatus() {
+    var base = getApiBase();
+    // Se está no Python direto, não precisa do aviso
+    if (!base) {
+      if (serverStatus) serverStatus.classList.add("hidden");
+      return;
+    }
+    // Verifica se o servidor Python está online
+    fetch(base + "/api/consultar/00000000000000", {
+      method: "GET",
+      mode: "cors",
+      cache: "no-store",
+    })
+      .then(function () {
+        if (serverStatus) serverStatus.classList.add("hidden");
+      })
+      .catch(function () {
+        if (serverStatus) serverStatus.classList.remove("hidden");
+        setTimeout(checkServerStatus, 5000);
+      });
+  }
+
+  // Botão para iniciar servidor Python (tenta conectar até dar certo)
+  if (startServerBtn) {
+    startServerBtn.addEventListener("click", function () {
+      startServerBtn.textContent = "Aguardando...";
+      startServerBtn.disabled = true;
+
+      var attempts = 0;
+      var interval = setInterval(function () {
+        attempts++;
+        var base = getApiBase();
+        if (!base) {
+          clearInterval(interval);
+          startServerBtn.textContent = "Conectado!";
+          if (serverStatus) serverStatus.classList.add("hidden");
+          showToast("Servidor Python conectado!", "success");
+          return;
+        }
+        fetch(base + "/api/consultar/00000000000000", {
+          method: "GET",
+          mode: "cors",
+          cache: "no-store",
+        })
+          .then(function () {
+            clearInterval(interval);
+            startServerBtn.textContent = "Conectado!";
+            if (serverStatus) serverStatus.classList.add("hidden");
+            showToast("Servidor Python conectado!", "success");
+          })
+          .catch(function () {
+            if (attempts >= 15) {
+              clearInterval(interval);
+              startServerBtn.textContent = "Iniciar Servidor Python";
+              startServerBtn.disabled = false;
+              showToast("Execute 'python app.py' manualmente.", "error");
+            }
+          });
+      }, 2000);
+    });
+  }
+
+  // =============================================
   // Accordion Renderer (recursive)
   // =============================================
   function renderAccordion(data, level) {
@@ -227,7 +320,6 @@
       return span;
     }
 
-    // Valores primitivos
     if (
       typeof data === "string" ||
       typeof data === "number" ||
@@ -239,7 +331,6 @@
       return span;
     }
 
-    // Array
     if (Array.isArray(data)) {
       if (data.length === 0) {
         const span = document.createElement("span");
@@ -256,7 +347,6 @@
         itemDiv.className = "accordion-list-item";
 
         if (isObj(item) || Array.isArray(item)) {
-          // Se o item é um objeto, cria um mini-acordeão
           const label = document.createElement("div");
           label.className =
             "text-xs font-bold uppercase tracking-[0.12em] text-sky-600 dark:text-sky-400 mb-2";
@@ -264,7 +354,6 @@
           itemDiv.appendChild(label);
           itemDiv.appendChild(renderAccordion(item, level + 1));
         } else {
-          // Valor simples
           const label = document.createElement("div");
           label.className =
             "text-xs font-bold uppercase tracking-[0.12em] text-slate-400 mb-1";
@@ -282,7 +371,6 @@
       return wrapper;
     }
 
-    // Objeto - cria acordeão
     const container = document.createElement("div");
     container.className = "accordion-container";
 
@@ -291,7 +379,6 @@
       const item = document.createElement("div");
       item.className = "accordion-item";
 
-      // Header (clicável)
       const header = document.createElement("button");
       header.className = "accordion-header";
       header.setAttribute("aria-expanded", "false");
@@ -307,7 +394,6 @@
       header.appendChild(labelSpan);
       header.appendChild(icon);
 
-      // Body (conteúdo expansível)
       const body = document.createElement("div");
       body.className = "accordion-body";
 
@@ -315,10 +401,8 @@
       inner.className = "accordion-body-inner";
 
       if (isObj(v) || Array.isArray(v)) {
-        // Para objetos/arrays, renderiza sub-acordeão
         inner.appendChild(renderAccordion(v, level + 1));
       } else {
-        // Valor simples
         const valSpan = document.createElement("span");
         valSpan.className = "accordion-value";
         valSpan.textContent = formatValue(k, v);
@@ -330,7 +414,6 @@
       item.appendChild(body);
       container.appendChild(item);
 
-      // Toggle accordion
       header.addEventListener("click", () => {
         const isOpen = item.classList.toggle("is-open");
         header.setAttribute("aria-expanded", isOpen ? "true" : "false");
@@ -370,11 +453,9 @@
   function getRegimeTributario(data) {
     const simples = safe(data.simples);
     if (typeof simples === "object" && Object.keys(simples).length > 0) {
-      // Campo "simples" dentro do objeto "simples" da API
       const s = simples.simples;
       if (s === "Sim") return "Simples Nacional";
       if (s === "N\u00e3o") return "Regime Normal";
-      // Fallback: verifica campo "mei"
       if (simples.mei === "Sim") return "MEI - Simples Nacional";
       return "N\u00e3o informado";
     }
@@ -387,7 +468,7 @@
       label +
       '<span class="tooltip-icon" aria-hidden="true">?</span><span class="tooltip-text">' +
       text +
-      "</span></span>"
+      "</span>"
     );
   }
 
@@ -429,7 +510,6 @@
       " \u2014 ",
     );
 
-    // Campos com links
     const cnpjDigits = cleanDigits(String(est.cnpj || ""));
     const cnpjStr = formatCnpj(cnpjDigits) || "-";
     const cnpjLink =
@@ -473,7 +553,7 @@
       {
         label: makeTooltip(
           "CNAE principal",
-          "Classifica\u00e7\u00e3o Nacional de Atividades Econ\u00f4micas. \u00c9 a atividade principal declarada pela empresa.",
+          "Classifica\u00e7\u00e3o Nacional de Atividades Econ\u00f4micas.",
         ),
         value: activityName,
         html: true,
@@ -487,7 +567,7 @@
       {
         label: makeTooltip(
           "Inscri\u00e7\u00f5es estaduais",
-          "Registro estadual que autoriza a empresa a emitir notas fiscais. Cada estado pode ter uma inscri\u00e7\u00e3o diferente.",
+          "Registro estadual que autoriza a empresa a emitir notas fiscais.",
         ),
         value: registrations.join(" \u00b7 ") || "-",
         html: true,
@@ -495,7 +575,7 @@
       {
         label: makeTooltip(
           "Regime tribut\u00e1rio",
-          "Forma de tributa\u00e7\u00e3o da empresa: Simples Nacional (regime simplificado) ou Regime Normal (Lucro Presumido/Real).",
+          "Forma de tributa\u00e7\u00e3o da empresa: Simples Nacional ou Regime Normal.",
         ),
         value: regime,
         html: true,
@@ -511,7 +591,7 @@
       {
         label: makeTooltip(
           "Natureza jur\u00eddica",
-          "Classifica\u00e7\u00e3o legal da empresa: MEI, LTDA, SA, Associa\u00e7\u00e3o, etc.",
+          "Classifica\u00e7\u00e3o legal da empresa: MEI, LTDA, SA, etc.",
         ),
         value: safeText(legalNature.descricao),
         html: true,
@@ -521,7 +601,6 @@
 
   function removeSummaryDuplicates(data) {
     const details = Object.assign({}, data);
-    // Mantem capital_social nos detalhes para aparecer na secao dinamica
     ["razao_social", "porte", "natureza_juridica"].forEach(
       (k) => delete details[k],
     );
@@ -564,13 +643,11 @@
     resultsSection.classList.remove("hidden");
     resultsSection.classList.add("fade-in");
 
-    // Contador de campos
     const total = countFilled(data);
     fieldCounter.textContent = total;
     statusMessage.textContent =
       total + " campos preenchidos em " + Object.keys(data).length + " grupos.";
 
-    // Summary cards
     const fields = getSummaryFields(data);
     summaryContainer.innerHTML = "";
     fields.forEach((f) => {
@@ -580,12 +657,10 @@
       const label = document.createElement("div");
       label.className =
         "text-xs font-bold uppercase tracking-[0.16em] text-slate-400";
-      // Suporta tooltips no label (HTML)
       label.innerHTML = f.label;
       const value = document.createElement("div");
       value.className =
         "mt-3 break-words text-sm font-semibold text-slate-800 dark:text-slate-100";
-      // Usa innerHTML se for HTML, senão textContent
       if (f.html) {
         value.innerHTML = f.value;
       } else {
@@ -596,7 +671,6 @@
       summaryContainer.appendChild(div);
     });
 
-    // Detalhes dinâmicos em acordeão
     const detailData = removeSummaryDuplicates(data);
     detailsContainer.innerHTML = "";
     if (Object.keys(detailData).length > 0) {
@@ -608,7 +682,6 @@
       detailsContainer.appendChild(p);
     }
 
-    // Atualiza CNPJ para o print
     printCnpj.textContent =
       "CNPJ: " +
       formatCnpj(String(data.estabelecimento?.cnpj || "")) +
@@ -634,7 +707,6 @@
 
     setLoading(true);
 
-    // Cache em sessionStorage
     const cacheKey = "ccnpj-" + digits;
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
@@ -649,14 +721,19 @@
       }
     }
 
-    fetch("/api/consultar/" + encodeURIComponent(digits))
-      .then((r) =>
-        r.json().then((d) => {
-          if (!r.ok) throw new Error(d.erro || "Erro " + r.status);
-          return d;
-        }),
-      )
-      .then((d) => {
+    var apiBase = getApiBase();
+    var apiUrl = apiBase + "/api/consultar/" + encodeURIComponent(digits);
+
+    fetch(apiUrl, { mode: "cors" })
+      .then(function (r) {
+        if (!r.ok) {
+          return r.json().then(function (d) {
+            throw new Error(d.erro || "Erro " + r.status);
+          });
+        }
+        return r.json();
+      })
+      .then(function (d) {
         try {
           sessionStorage.setItem(cacheKey, JSON.stringify(d));
           sessionStorage.setItem("ccnpj-last", digits);
@@ -665,11 +742,23 @@
         }
         renderResults(d);
         showToast("Consulta realizada com sucesso!", "success");
+        setLoading(false);
       })
-      .catch((err) => {
-        showToast(err.message || "Erro ao consultar.", "error");
-      })
-      .finally(() => {
+      .catch(function (err) {
+        var msg = err.message || "Erro ao consultar.";
+        if (
+          msg === "Failed to fetch" ||
+          msg.indexOf("NetworkError") !== -1 ||
+          msg.indexOf("Failed") !== -1
+        ) {
+          showToast(
+            "Servidor Python n\u00e3o encontrado. Clique no aviso amarelo para inici\u00e1-lo.",
+            "error",
+          );
+          if (serverStatus) serverStatus.classList.remove("hidden");
+        } else {
+          showToast(msg, "error");
+        }
         setLoading(false);
       });
   }
@@ -679,7 +768,6 @@
   // =============================================
   consultarBtn.addEventListener("click", handleSearch);
 
-  // Exportar PDF usando window.print()
   exportPdfBtn.addEventListener("click", () => {
     if (!currentData) {
       showToast("Fa\u00e7a uma consulta antes de exportar.", "error");
@@ -689,7 +777,7 @@
   });
 
   // =============================================
-  // Restore last search from sessionStorage
+  // Restore last search
   // =============================================
   (function restoreLast() {
     try {
@@ -706,4 +794,7 @@
       /* silent */
     }
   })();
+
+  // Verifica status do servidor ao carregar
+  setTimeout(checkServerStatus, 1000);
 })();

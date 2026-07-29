@@ -44,7 +44,7 @@ SECURITY_HEADERS = {
         "script-src 'self' https://cdn.tailwindcss.com; "
         "style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; "
         "img-src 'self' data:; "
-        "connect-src 'self' https://publica.cnpj.ws; "
+        "connect-src 'self' https://publica.cnpj.ws http://127.0.0.1:5500 http://127.0.0.1:5501 http://127.0.0.1:5502; "
         "frame-ancestors 'none'; "
         "form-action 'self'"
     ),
@@ -142,6 +142,8 @@ class ConsultaCNPJHandler(http.server.BaseHTTPRequestHandler):
     def _add_security_headers(self):
         for key, value in SECURITY_HEADERS.items():
             self.send_header(key, value)
+        # CORS: permite que o Live Server (porta 5500) chame a API
+        self.send_header("Access-Control-Allow-Origin", "*")
 
     def _send_response(self, status_code, headers, body):
         self.send_response(status_code)

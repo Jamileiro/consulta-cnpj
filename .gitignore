@@ -5,6 +5,7 @@ __pycache__/
 *.egg-info/
 .DS_Store
 *.bat
+!start.bat
 fix_app.py
 push_to_github.py
 setup_and_push.py

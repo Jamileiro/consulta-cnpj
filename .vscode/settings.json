@@ -1,0 +1,30 @@
+{
+  // ============================================
+  // CONFIGURAÇÕES VS CODE - ConsultaCNPJ
+  // ============================================
+  //
+  // ✅ APENAS CLIQUE EM "GO LIVE" - Tudo funciona automaticamente
+  //
+
+  // --- Live Server (Go Live) ---
+  "liveServer.settings.root": "/",
+  "liveServer.settings.file": "index.html",
+  "liveServer.settings.NoBrowser": false,
+  "liveServer.settings.ignoreFiles": [
+    ".vscode/**",
+    "**/*.pyc",
+    "**/__pycache__/**",
+    "**/.git/**",
+    "**/*.py",
+    "*.md",
+    "*.txt"
+  ],
+  "liveServer.settings.port": 5500,
+  "liveServer.settings.donotShowInfoMsg": true,
+  "liveServer.settings.ChromeDebuggingAttachment": false,
+
+  // --- Editor ---
+  "editor.tabSize": 2,
+  "files.encoding": "utf8",
+  "files.eol": "\n"
+}
