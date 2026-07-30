@@ -15,13 +15,12 @@ import urllib.request
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from functools import lru_cache
 from socketserver import ThreadingMixIn
 
 # ─── Configuração ───────────────────────────────────────────────────────────
 CNPJ_API_BASE = "https://publica.cnpj.ws/cnpj"
 REQUEST_TIMEOUT = 15
-PORT = int(os.getenv("PORT", "5000"))
+PORT = int(os.getenv("PORT", "5500"))
 HOST = os.getenv("HOST", "0.0.0.0")
 RATE_LIMIT_MAX = 60
 RATE_LIMIT_WINDOW = 60
@@ -131,7 +130,6 @@ def proxy_cnpj(cnpj):
         log("ERR", f"CNPJ inválido: {cnpj}")
         return format_error(400, "CNPJ inválido. Informe um CNPJ com 14 dígitos válidos.")
 
-    # Verifica cache
     cached = cache.get(digits)
     if cached:
         log("OK", f"Cache hit: {digits}")
@@ -215,7 +213,6 @@ class ThreadedHTTPServer(ThreadingMixIn, http.server.HTTPServer):
     allow_reuse_address = True
 
 class ConsultaCNPJHandler(http.server.BaseHTTPRequestHandler):
-    # Silencia logs padrão do servidor
     def log_message(self, format, *args):
         pass
 
@@ -255,34 +252,28 @@ class ConsultaCNPJHandler(http.server.BaseHTTPRequestHandler):
             body = json.dumps({"erro": "Muitas requisições. Aguarde um minuto."}, ensure_ascii=False).encode("utf-8")
             return self._send(429, {"Content-Type": "application/json; charset=utf-8", "Retry-After": "60"}, body)
 
-        # Health check
         if path == "/api/health":
-            body = json.dumps({"status": "ok", "timestamp": datetime.now().isoformat()}, ensure_ascii=False).encode("utf-8")
+            body = json.dumps({"status": "ok", "timestamp": datetime.now().isoformat()}).encode("utf-8")
             return self._send(200, {"Content-Type": "application/json; charset=utf-8"}, body)
 
-        # Consulta CNPJ
         if path.startswith("/api/consultar/"):
             cnpj = path[len("/api/consultar/"):]
             log("INFO", f"Requisição de {ip}: consultar CNPJ {cnpj}")
             status, headers, body = proxy_cnpj(cnpj)
             return self._send(status, headers, body)
 
-        # Arquivos estáticos
         if path.startswith("/static/"):
             file_path = path[len("/static/"):]
             status, headers, body = serve_static_file(file_path)
             return self._send(status, headers, body)
 
-        # Página inicial
         if path == "/":
             status, headers, body = serve_template()
             return self._send(status, headers, body)
 
-        # 404
         self._send(404, {"Content-Type": "text/plain; charset=utf-8"}, b"Not found")
 
     def do_HEAD(self):
-        # Apenas responde cabeçalho para health check
         if self.path == "/api/health":
             self._send(204, {"Content-Type": "application/json; charset=utf-8"}, None)
         else:
@@ -297,7 +288,6 @@ class ConsultaCNPJHandler(http.server.BaseHTTPRequestHandler):
 
 # ─── Main ───────────────────────────────────────────────────────────────────
 def main():
-    # Parse args
     port = PORT
     args = sys.argv[1:]
     for i, arg in enumerate(args):
@@ -314,10 +304,10 @@ def main():
     print("  \033[36m║       CONSULTA CNPJ  v2.0           ║\033[0m")
     print("  \033[36m╠══════════════════════════════════════╣\033[0m")
     print(f"  \033[36m║\033[0m  Servidor: \033[1mhttp://{HOST}:{port}\033[0m          \033[36m║\033[0m")
-    print("  \033[36m║  Threads:  ✓  Cache: ✓  Rate: ✓   ║\033[0m")
+    print("  \033[36m║  Threads: ✓  Cache: ✓  Rate: ✓    ║\033[0m")
     print("  \033[36m╚══════════════════════════════════════╝\033[0m")
     print("")
-    log("OK", "Servidor pronto! Acesse http://localhost:5000")
+    log("OK", f"Servidor pronto! Acesse http://localhost:{port}")
     log("INFO", "Pressione Ctrl+C para parar")
     print("")
     try:
@@ -329,4 +319,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
