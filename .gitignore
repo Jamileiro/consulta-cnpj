@@ -1,13 +1,30 @@
-venv/
-*.pyc
+# Python
 __pycache__/
-.env
+*.pyc
+*.pyo
 *.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/settings.json
+.vscode/*.code-snippets
+
+# OS
 .DS_Store
-*.bat
-!start.bat
-fix_app.py
-push_to_github.py
-setup_and_push.py
-install_*.py
+Thumbs.db
+*.swp
+*.swo
+
+# Env
+.env
+.env.local
+
+# Project specific
 TODO.md

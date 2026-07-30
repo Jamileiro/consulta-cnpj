@@ -1,5 +1,5 @@
 /**
- * ConsultaCNPJ - Frontend JavaScript
+ * ConsultaCNPJ - Frontend simplificado
  * Máscara CNPJ, validação, consulta API, acordeão dinâmico, tema, export PDF
  */
 (function () {
@@ -21,17 +21,15 @@
   const themeToggle = $("theme-toggle");
   const offlineBadge = $("offline-badge");
   const printCnpj = $("print-cnpj");
-  const serverStatus = $("server-status");
-  const startServerBtn = $("start-server-btn");
 
   // =============================================
   // State
   // =============================================
   let currentData = null;
-  let theme = localStorage.getItem("consulta-cnpj-theme") || "light";
+  let theme = localStorage.getItem("ccnpj-theme") || "light";
 
   // =============================================
-  // Utility Functions
+  // Utilitários
   // =============================================
   const cleanDigits = (v) => String(v).replace(/\D/g, "");
 
@@ -114,7 +112,7 @@
       return formatDate(String(v));
     if (/capital(_|[A-Z])?social|capital_total/i.test(key))
       return formatMoney(v);
-    if (typeof v === "boolean") return v ? "Sim" : "N\u00e3o";
+    if (typeof v === "boolean") return v ? "Sim" : "Não";
     return safeText(v);
   }
 
@@ -148,12 +146,12 @@
   const isObj = (v) => v !== null && typeof v === "object";
 
   // =============================================
-  // Theme
+  // Tema
   // =============================================
   function applyTheme(t) {
     theme = t;
     document.documentElement.classList.toggle("dark", t === "dark");
-    localStorage.setItem("consulta-cnpj-theme", t);
+    localStorage.setItem("ccnpj-theme", t);
     themeToggle.textContent =
       t === "light" ? "Usar tema escuro" : "Usar tema claro";
     themeToggle.setAttribute(
@@ -176,26 +174,24 @@
   updateOnline();
 
   // =============================================
-  // CNPJ Input Mask (corrigido: preserva cursor)
+  // Máscara CNPJ
   // =============================================
   cnpjInput.addEventListener("input", function () {
     const start = this.selectionStart;
     const rawDigits = cleanDigits(this.value);
-
     if (rawDigits.length === 0) {
       this.value = "";
       return;
     }
-
     const oldLength = this.value.length;
     this.value = formatCnpj(rawDigits);
     const newLength = this.value.length;
-
     let newPos = start + (newLength - oldLength);
     if (newPos < 0) newPos = 0;
     if (newPos > this.value.length) newPos = this.value.length;
     this.setSelectionRange(newPos, newPos);
   });
+
   cnpjInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -204,7 +200,7 @@
   });
 
   // =============================================
-  // Toast notifications
+  // Toast
   // =============================================
   function showToast(msg, type) {
     const t = document.createElement("div");
@@ -225,90 +221,11 @@
   function setLoading(isLoading) {
     loadingContainer.classList.toggle("hidden", !isLoading);
     consultarBtn.disabled = isLoading;
-    consultarBtn.textContent = isLoading
-      ? "Consultando\u2026"
-      : "Consultar CNPJ";
+    consultarBtn.textContent = isLoading ? "Consultando…" : "Consultar CNPJ";
   }
 
   // =============================================
-  // API Base URL detection
-  // =============================================
-  function getApiBase() {
-    var port = parseInt(window.location.port);
-    if (!isNaN(port) && port >= 5500 && port <= 5510) {
-      // Está no Live Server: API em porta 5000
-      return (
-        window.location.protocol + "//" + window.location.hostname + ":5000"
-      );
-    }
-    // Já está no servidor Python (porta 5000)
-    return "";
-  }
-
-  function checkServerStatus() {
-    var base = getApiBase();
-    // Se está no Python direto, não precisa do aviso
-    if (!base) {
-      if (serverStatus) serverStatus.classList.add("hidden");
-      return;
-    }
-    // Verifica se o servidor Python está online
-    fetch(base + "/api/consultar/00000000000000", {
-      method: "GET",
-      mode: "cors",
-      cache: "no-store",
-    })
-      .then(function () {
-        if (serverStatus) serverStatus.classList.add("hidden");
-      })
-      .catch(function () {
-        if (serverStatus) serverStatus.classList.remove("hidden");
-        setTimeout(checkServerStatus, 5000);
-      });
-  }
-
-  // Botão para iniciar servidor Python (tenta conectar até dar certo)
-  if (startServerBtn) {
-    startServerBtn.addEventListener("click", function () {
-      startServerBtn.textContent = "Aguardando...";
-      startServerBtn.disabled = true;
-
-      var attempts = 0;
-      var interval = setInterval(function () {
-        attempts++;
-        var base = getApiBase();
-        if (!base) {
-          clearInterval(interval);
-          startServerBtn.textContent = "Conectado!";
-          if (serverStatus) serverStatus.classList.add("hidden");
-          showToast("Servidor Python conectado!", "success");
-          return;
-        }
-        fetch(base + "/api/consultar/00000000000000", {
-          method: "GET",
-          mode: "cors",
-          cache: "no-store",
-        })
-          .then(function () {
-            clearInterval(interval);
-            startServerBtn.textContent = "Conectado!";
-            if (serverStatus) serverStatus.classList.add("hidden");
-            showToast("Servidor Python conectado!", "success");
-          })
-          .catch(function () {
-            if (attempts >= 15) {
-              clearInterval(interval);
-              startServerBtn.textContent = "Iniciar Servidor Python";
-              startServerBtn.disabled = false;
-              showToast("Execute 'python app.py' manualmente.", "error");
-            }
-          });
-      }, 2000);
-    });
-  }
-
-  // =============================================
-  // Accordion Renderer (recursive)
+  // Accordion
   // =============================================
   function renderAccordion(data, level) {
     level = level || 0;
@@ -338,14 +255,11 @@
         span.textContent = "Lista vazia";
         return span;
       }
-
       const wrapper = document.createElement("div");
       wrapper.className = "space-y-2";
-
       data.forEach((item, i) => {
         const itemDiv = document.createElement("div");
         itemDiv.className = "accordion-list-item";
-
         if (isObj(item) || Array.isArray(item)) {
           const label = document.createElement("div");
           label.className =
@@ -364,10 +278,8 @@
           itemDiv.appendChild(label);
           itemDiv.appendChild(val);
         }
-
         wrapper.appendChild(itemDiv);
       });
-
       return wrapper;
     }
 
@@ -424,13 +336,13 @@
   }
 
   // =============================================
-  // Summary Helpers
+  // Summary
   // =============================================
   const safe = (obj, fallback) => (isObj(obj) ? obj : fallback || {});
   const arr = (v) => (Array.isArray(v) ? v : []);
 
   function joinAvailable(values, sep) {
-    sep = sep || " \u00b7 ";
+    sep = sep || " · ";
     const items = values.map(safeText).filter((i) => i !== "-");
     return items.length ? items.join(sep) : "-";
   }
@@ -455,11 +367,11 @@
     if (typeof simples === "object" && Object.keys(simples).length > 0) {
       const s = simples.simples;
       if (s === "Sim") return "Simples Nacional";
-      if (s === "N\u00e3o") return "Regime Normal";
+      if (s === "Não") return "Regime Normal";
       if (simples.mei === "Sim") return "MEI - Simples Nacional";
-      return "N\u00e3o informado";
+      return "Não informado";
     }
-    return "N\u00e3o informado";
+    return "Não informado";
   }
 
   function makeTooltip(label, text) {
@@ -507,7 +419,7 @@
     ].filter(Boolean);
     const activityName = joinAvailable(
       [activity.subclasse, activity.descricao],
-      " \u2014 ",
+      " — ",
     );
 
     const cnpjDigits = cleanDigits(String(est.cnpj || ""));
@@ -537,14 +449,14 @@
 
     return [
       { label: "CNPJ", value: cnpjLink, html: true },
-      { label: "Raz\u00e3o social", value: safeText(data.razao_social) },
+      { label: "Razão social", value: safeText(data.razao_social) },
       { label: "Nome fantasia", value: safeText(est.nome_fantasia) },
       {
-        label: "Situa\u00e7\u00e3o",
+        label: "Situação",
         value: getSituacaoBadge(est.situacao_cadastral),
         html: true,
       },
-      { label: "Endere\u00e7o", value: addressLink, html: true },
+      { label: "Endereço", value: addressLink, html: true },
       {
         label: "Cidade / UF",
         value: joinAvailable([city.nome, state.sigla], " / "),
@@ -553,29 +465,29 @@
       {
         label: makeTooltip(
           "CNAE principal",
-          "Classifica\u00e7\u00e3o Nacional de Atividades Econ\u00f4micas.",
+          "Classificação Nacional de Atividades Econômicas.",
         ),
         value: activityName,
         html: true,
       },
       {
-        label: "In\u00edcio das atividades",
+        label: "Início das atividades",
         value: formatDate(String(est.data_inicio_atividade || "")) || "-",
       },
-      { label: "Telefone", value: phones.join(" \u00b7 ") || "-" },
+      { label: "Telefone", value: phones.join(" · ") || "-" },
       { label: "E-mail", value: safeText(est.email) },
       {
         label: makeTooltip(
-          "Inscri\u00e7\u00f5es estaduais",
+          "Inscrições estaduais",
           "Registro estadual que autoriza a empresa a emitir notas fiscais.",
         ),
-        value: registrations.join(" \u00b7 ") || "-",
+        value: registrations.join(" · ") || "-",
         html: true,
       },
       {
         label: makeTooltip(
-          "Regime tribut\u00e1rio",
-          "Forma de tributa\u00e7\u00e3o da empresa: Simples Nacional ou Regime Normal.",
+          "Regime tributário",
+          "Forma de tributação da empresa: Simples Nacional ou Regime Normal.",
         ),
         value: regime,
         html: true,
@@ -583,15 +495,15 @@
       {
         label: makeTooltip(
           "Porte",
-          "Classifica\u00e7\u00e3o do porte da empresa segundo a Receita Federal.",
+          "Classificação do porte da empresa segundo a Receita Federal.",
         ),
         value: safeText(companySize.descricao),
         html: true,
       },
       {
         label: makeTooltip(
-          "Natureza jur\u00eddica",
-          "Classifica\u00e7\u00e3o legal da empresa: MEI, LTDA, SA, etc.",
+          "Natureza jurídica",
+          "Classificação legal da empresa: MEI, LTDA, SA, etc.",
         ),
         value: safeText(legalNature.descricao),
         html: true,
@@ -636,7 +548,7 @@
   }
 
   // =============================================
-  // Render Results
+  // Render
   // =============================================
   function renderResults(data) {
     currentData = data;
@@ -661,11 +573,8 @@
       const value = document.createElement("div");
       value.className =
         "mt-3 break-words text-sm font-semibold text-slate-800 dark:text-slate-100";
-      if (f.html) {
-        value.innerHTML = f.value;
-      } else {
-        value.textContent = f.value;
-      }
+      if (f.html) value.innerHTML = f.value;
+      else value.textContent = f.value;
       div.appendChild(label);
       div.appendChild(value);
       summaryContainer.appendChild(div);
@@ -678,7 +587,7 @@
     } else {
       const p = document.createElement("p");
       p.className = "text-sm text-slate-500 dark:text-slate-400";
-      p.textContent = "Todos os dados j\u00e1 foram exibidos no resumo acima.";
+      p.textContent = "Todos os dados já foram exibidos no resumo acima.";
       detailsContainer.appendChild(p);
     }
 
@@ -698,7 +607,7 @@
 
     if (!validateCnpj(digits)) {
       showToast(
-        "CNPJ inv\u00e1lido. Verifique os d\u00edgitos e tente novamente.",
+        "CNPJ inválido. Verifique os dígitos e tente novamente.",
         "error",
       );
       cnpjInput.focus();
@@ -721,10 +630,7 @@
       }
     }
 
-    var apiBase = getApiBase();
-    var apiUrl = apiBase + "/api/consultar/" + encodeURIComponent(digits);
-
-    fetch(apiUrl, { mode: "cors" })
+    fetch("/api/consultar/" + encodeURIComponent(digits))
       .then(function (r) {
         if (!r.ok) {
           return r.json().then(function (d) {
@@ -745,39 +651,26 @@
         setLoading(false);
       })
       .catch(function (err) {
-        var msg = err.message || "Erro ao consultar.";
-        if (
-          msg === "Failed to fetch" ||
-          msg.indexOf("NetworkError") !== -1 ||
-          msg.indexOf("Failed") !== -1
-        ) {
-          showToast(
-            "Servidor Python n\u00e3o encontrado. Clique no aviso amarelo para inici\u00e1-lo.",
-            "error",
-          );
-          if (serverStatus) serverStatus.classList.remove("hidden");
-        } else {
-          showToast(msg, "error");
-        }
+        showToast(err.message || "Erro ao consultar.", "error");
         setLoading(false);
       });
   }
 
   // =============================================
-  // Event Listeners
+  // Eventos
   // =============================================
   consultarBtn.addEventListener("click", handleSearch);
 
   exportPdfBtn.addEventListener("click", () => {
     if (!currentData) {
-      showToast("Fa\u00e7a uma consulta antes de exportar.", "error");
+      showToast("Faça uma consulta antes de exportar.", "error");
       return;
     }
     window.print();
   });
 
   // =============================================
-  // Restore last search
+  // Restaurar última consulta
   // =============================================
   (function restoreLast() {
     try {
@@ -794,7 +687,4 @@
       /* silent */
     }
   })();
-
-  // Verifica status do servidor ao carregar
-  setTimeout(checkServerStatus, 1000);
 })();

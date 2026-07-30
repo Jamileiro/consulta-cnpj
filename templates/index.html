@@ -3,10 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="color-scheme" content="light dark" />
     <title>Consulta CNPJ</title>
     <meta
       name="description"
-      content="Consulte dados cadastrais de qualquer CNPJ gratuitamente."
+      content="Consulte dados cadastrais de qualquer CNPJ de forma rápida, segura e responsiva."
     />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -38,11 +40,10 @@
   <body
     class="bg-slate-100 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100"
   >
-    <div id="app" class="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+    <div id="app" class="min-h-screen px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
       <main
-        class="mx-auto max-w-6xl rounded-[2rem] border border-slate-200 bg-white/95 p-6 shadow-soft backdrop-blur sm:p-10 dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-soft-dark"
+        class="mx-auto max-w-6xl rounded-[2rem] border border-slate-200 bg-white/95 p-5 shadow-soft backdrop-blur sm:p-8 lg:p-10 dark:border-slate-700 dark:bg-slate-900/95 dark:shadow-soft-dark"
       >
-        <!-- Cabeçalho -->
         <header
           class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between no-print"
         >
@@ -69,8 +70,8 @@
             <p
               class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base"
             >
-              Informe um CNPJ válido para consultar os dados cadastrais
-              completos.
+              Informe um CNPJ válido para consultar dados cadastrais com uma
+              interface responsiva, leve e pronta para nuvem.
             </p>
           </div>
           <div class="flex flex-wrap gap-3 lg:justify-end">
@@ -85,10 +86,9 @@
           </div>
         </header>
 
-        <!-- Seção de consulta -->
         <section class="mb-6 no-print">
           <div
-            class="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800/70"
+            class="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/70 sm:p-6"
           >
             <label
               class="block text-sm font-semibold text-slate-700 dark:text-slate-200"
@@ -130,12 +130,16 @@
                 </div>
               </div>
             </div>
+            <p
+              class="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400"
+            >
+              A pesquisa é feita em tempo real e o resultado pode ser salvo como
+              PDF pelo navegador.
+            </p>
           </div>
         </section>
 
-        <!-- Resultados -->
         <section id="results-section" class="hidden space-y-6">
-          <!-- Cabeçalho dos resultados (visível apenas no print) -->
           <div class="print-only print-header">
             <h2 class="text-xl font-bold">Consulta CNPJ</h2>
             <p id="print-cnpj" class="text-sm text-slate-600"></p>
@@ -151,24 +155,22 @@
                 Informações principais do CNPJ consultado.
               </p>
             </div>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
               <button
                 type="button"
                 id="export-pdf-btn"
                 class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-400 hover:text-sky-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-sky-500 dark:hover:text-sky-300"
               >
-                Exportar PDF
+                Salvar como PDF
               </button>
             </div>
           </div>
 
-          <!-- Summary cards -->
           <div
             id="summary-container"
             class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
           ></div>
 
-          <!-- Contador e status -->
           <div
             class="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50 no-print"
           >
@@ -189,7 +191,6 @@
             ></span>
           </div>
 
-          <!-- Detalhes dinâmicos (Acordeão) -->
           <div
             class="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800/70"
           >
@@ -202,12 +203,11 @@
           </div>
         </section>
 
-        <!-- Footer -->
         <footer
           class="mt-10 border-t border-slate-200 pt-6 text-center text-xs text-slate-400 dark:border-slate-700 dark:text-slate-500 no-print"
         >
           <p>
-            Consulta CNPJ v1.0 &mdash; Dados via
+            Consulta CNPJ v1.1 &mdash; Dados via
             <a
               href="https://publica.cnpj.ws"
               target="_blank"

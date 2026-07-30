@@ -1,35 +1,23 @@
 {
-  // ============================================
-  // TASKS - ConsultaCNPJ
-  // ============================================
   "version": "2.0.0",
   "tasks": [
     {
       "label": "Iniciar Servidor Python",
       "type": "shell",
-      "command": "start python app.py",
-      "isBackground": true,
-      "problemMatcher": {
-        "pattern": [{ "regexp": "." }],
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": ".",
-          "endsPattern": "."
-        }
-      },
-      "runOptions": {
-        "runOn": "folderOpen"
-      },
+      "command": "python app.py",
+      "group": "none",
       "presentation": {
-        "echo": false,
-        "reveal": "never",
+        "echo": true,
+        "reveal": "always",
         "focus": false,
         "panel": "dedicated",
         "showReuseMessage": false,
-        "clear": false,
-        "close": true
+        "clear": true
       },
-      "group": "none"
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
     }
   ]
 }

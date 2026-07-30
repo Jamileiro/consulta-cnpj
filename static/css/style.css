@@ -1,8 +1,15 @@
 /* ============================================
-   ConsultaCNPJ - Custom Styles
+   ConsultaCNPJ - Estilos leves e responsivos
    ============================================ */
 
-/* Scrollbar customizada */
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -12,7 +19,7 @@
 }
 ::-webkit-scrollbar-thumb {
   background: #94a3b8;
-  border-radius: 4px;
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
@@ -24,7 +31,6 @@
   background: #64748b;
 }
 
-/* Touch targets mínimos para mobile */
 button,
 input,
 select,
@@ -37,7 +43,6 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
-/* Animações de entrada */
 .fade-in {
   animation: fadeIn 0.3s ease-out;
 }
@@ -63,23 +68,21 @@ input:focus-visible {
   }
 }
 
-/* Toast de notificação */
 .toast {
   position: fixed;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
-  padding: 12px 24px;
-  border-radius: 16px;
+  padding: 12px 20px;
+  border-radius: 999px;
   font-size: 0.875rem;
   font-weight: 600;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.16);
   pointer-events: none;
 }
 .toast-success {
-  background: #059669;
+  background: #047857;
   color: #fff;
 }
 .toast-error {
@@ -87,7 +90,6 @@ input:focus-visible {
   color: #fff;
 }
 
-/* Cards de resumo */
 .summary-card {
   transition:
     transform 0.15s ease,
@@ -101,15 +103,11 @@ input:focus-visible {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-/* ============================================
-   Acordeão (Accordion) Styles
-   ============================================ */
 .accordion-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .accordion-item {
   border: 1px solid #e2e8f0;
   border-radius: 16px;
@@ -127,7 +125,6 @@ input:focus-visible {
 .dark .accordion-item:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
-
 .accordion-header {
   display: flex;
   align-items: center;
@@ -158,7 +155,6 @@ input:focus-visible {
 .dark .accordion-header:hover {
   background: #0f172a;
 }
-
 .accordion-icon {
   display: flex;
   align-items: center;
@@ -195,7 +191,6 @@ input:focus-visible {
   background: #0ea5e9;
   color: #fff;
 }
-
 .accordion-body {
   max-height: 0;
   overflow: hidden;
@@ -205,10 +200,9 @@ input:focus-visible {
   padding: 0 18px;
 }
 .accordion-item.is-open .accordion-body {
-  max-height: 2000px;
+  max-height: 2200px;
   padding: 0 18px 18px 18px;
 }
-
 .accordion-body-inner {
   padding-top: 8px;
   border-top: 1px solid #e2e8f0;
@@ -220,8 +214,6 @@ input:focus-visible {
   border-color: #334155;
   color: #cbd5e1;
 }
-
-/* Sub-acordeão (aninhado) */
 .accordion-container .accordion-container {
   margin-top: 8px;
   gap: 8px;
@@ -251,8 +243,6 @@ input:focus-visible {
   height: 24px;
   font-size: 0.9rem;
 }
-
-/* Valor simples dentro do acordeão */
 .accordion-value {
   display: block;
   padding: 6px 0;
@@ -263,8 +253,6 @@ input:focus-visible {
 .dark .accordion-value {
   color: #e2e8f0;
 }
-
-/* Lista items dentro do acordeão */
 .accordion-list-item {
   padding: 10px 14px;
   margin-bottom: 8px;
@@ -280,9 +268,6 @@ input:focus-visible {
   margin-bottom: 0;
 }
 
-/* ============================================
-   Tooltip
-   ============================================ */
 .field-tooltip {
   position: relative;
   display: inline-flex;
@@ -317,12 +302,8 @@ input:focus-visible {
   background: #1e293b;
   color: #f1f5f9;
   font-size: 0.75rem;
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: normal;
   padding: 8px 12px;
   border-radius: 10px;
-  white-space: nowrap;
   max-width: 260px;
   white-space: normal;
   text-align: center;
@@ -354,9 +335,6 @@ input:focus-visible {
   border-top-color: #0f172a;
 }
 
-/* ============================================
-   Badge de Situação
-   ============================================ */
 .situacao-badge {
   display: inline-block;
   padding: 3px 10px;
@@ -395,9 +373,37 @@ input:focus-visible {
   color: #fcd34d;
 }
 
-/* ============================================
-   Link de campo
-   ============================================ */
+@media (max-width: 640px) {
+  .summary-card {
+    padding: 1rem;
+  }
+}
+
+@media print {
+  body {
+    background: #fff !important;
+    color: #0f172a !important;
+  }
+  body.printing {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .print-header {
+    margin-bottom: 1rem;
+  }
+  .summary-card,
+  .accordion-item,
+  .accordion-list-item {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}
 .field-link {
   color: #0284c7;
   text-decoration: underline;
