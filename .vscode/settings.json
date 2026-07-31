@@ -3,7 +3,8 @@
   // CONFIGURAÇÕES VS CODE - ConsultaCNPJ
   // ============================================
   //
-  // ✅ APENAS CLIQUE EM "GO LIVE" - Tudo funciona automaticamente
+  // ✅ PRESSIONE F5 para iniciar o servidor (http://localhost:5000)
+  //    O navegador abre automaticamente!
   //
 
   // --- Live Server (Go Live) ---

@@ -20,7 +20,7 @@ from socketserver import ThreadingMixIn
 # ─── Configuração ───────────────────────────────────────────────────────────
 CNPJ_API_BASE = "https://publica.cnpj.ws/cnpj"
 REQUEST_TIMEOUT = 15
-PORT = int(os.getenv("PORT", "5500"))
+PORT = int(os.getenv("PORT", "5000"))
 HOST = os.getenv("HOST", "0.0.0.0")
 RATE_LIMIT_MAX = 60
 RATE_LIMIT_WINDOW = 60
