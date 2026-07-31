@@ -1,8 +1,10 @@
-# 📋 ConsultaCNPJ
+# 📋 Consulta CNPJ
 
 Consulta dados cadastrais de qualquer CNPJ gratuitamente através da API pública [publica.cnpj.ws](https://publica.cnpj.ws).
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## ✨ Funcionalidades
@@ -15,55 +17,51 @@ Consulta dados cadastrais de qualquer CNPJ gratuitamente através da API públic
 - ✅ Cache em sessionStorage
 - ✅ Exportar PDF
 - ✅ Detecção de conectividade
-- ✅ Rate limiting (60 req/min)
-- ✅ Cache de consultas na API (5 min)
-- ✅ Threading (múltiplas requisições simultâneas)
 - ✅ Zero dependências
+- ✅ 100% estático — roda em qualquer lugar
 
 ## 🚀 Como usar
 
+### Opção 1 — GitHub Pages (recomendado)
+
+1. Faça o fork deste repositório
+2. Vá em **Settings → Pages**
+3. Em "Source", selecione **Deploy from a branch**
+4. Selecione `main` e pasta `/ (root)`
+5. Pronto! Seu site estará em `https://SEU_USUARIO.github.io/consulta-cnpj`
+
+### Opção 2 — Local (abrir direto)
+
 ```bash
-# 1. Clone
+# Clone
 git clone https://github.com/SEU_USUARIO/consulta-cnpj.git
 cd consulta-cnpj
 
-# 2. Execute
-python app.py
-
-# 3. Acesse
-# http://localhost:5000
+# Abra o index.html no navegador (clique duplo)
+# Ou use o Live Server no VSCode (Go Live)
 ```
 
-## 🔒 Segurança
+### Opção 3 — Netlify / Vercel
 
-- **CSP** restritiva
-- **Rate limiting**: 60 requisições/minuto por IP
-- **Headers de segurança**: X-Frame-Options, X-Content-Type-Options
-- **Proteção contra path traversal**
-- **Validação rigorosa de CNPJ**
-- **Zero dependências externas**
+Arraste a pasta do projeto para o [Netlify Drop](https://app.netlify.com/drop) ou importe o repositório no [Vercel](https://vercel.com).
 
 ## 📁 Estrutura
 
 ```
 consulta-cnpj/
-├── app.py                 # Servidor HTTP (Python puro)
+├── index.html              # Página principal (raiz para GitHub Pages)
 ├── static/
-│   ├── css/style.css      # Estilos customizados
-│   └── js/app.js          # Lógica do frontend
-├── templates/
-│   └── index.html         # Página principal
-└── tests/
-    └── test_app.py        # Testes unitários
+│   ├── css/style.css       # Estilos customizados
+│   └── js/app.js           # Lógica do frontend
+└── README.md               # Este arquivo
 ```
 
-## 🌐 Deploy
+## 🔒 Observações
 
-A aplicação é compatível com qualquer plataforma que suporte Python:
-
-- **Render**: `python app.py`
-- **Fly.io**: `python app.py`
-- **PythonAnywhere**: configuração manual
+- A API [publica.cnpj.ws](https://publica.cnpj.ws) é pública e gratuita
+- O CORS é aberto — chamadas diretas do navegador funcionam
+- Dados ficam em cache no `sessionStorage` durante a sessão
+- Nenhum dado é enviado para servidores intermediários
 
 ## 📄 Licença
 

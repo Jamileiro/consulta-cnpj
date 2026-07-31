@@ -630,7 +630,7 @@
       }
     }
 
-    fetch("/api/consultar/" + encodeURIComponent(digits))
+    fetch("https://publica.cnpj.ws/cnpj/" + encodeURIComponent(digits))
       .then(function (r) {
         if (!r.ok) {
           return r.json().then(function (d) {
