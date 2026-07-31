@@ -809,7 +809,13 @@
           e.stopPropagation();
           copyTextToClipboard(plainText);
         });
-        value.addEventListener("click", function () {
+        value.addEventListener("click", function (e) {
+          // Se o clique for em um link interno (ex: CNPJ, Endereço, CEP),
+          // intercepta para copiar em vez de navegar
+          const link = e.target.closest ? e.target.closest("a") : null;
+          if (link) {
+            e.preventDefault();
+          }
           copyTextToClipboard(plainText);
         });
         headerRow.appendChild(label);

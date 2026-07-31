@@ -1,5 +1,5 @@
 /* ConsultaCNPJ - Service Worker */
-const CACHE = "ccnpj-v2";
+const CACHE = "ccnpj-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -35,20 +35,28 @@ self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   // Não interceptar chamadas para a API externa (publica.cnpj.ws)
   if (e.request.url.indexOf("publica.cnpj.ws") !== -1) return;
+
+  // Estratégia network-first: sempre buscar da rede primeiro para garantir
+  // que os usuários recebam a versão mais recente. Usa cache apenas offline.
   e.respondWith(
-    caches.match(e.request).then((cached) => {
-      const fetchPromise = fetch(e.request)
-        .then((response) => {
-          if (response && response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE).then((cache) => cache.put(e.request, copy));
-          }
-          return response;
-        })
-        .catch(() => cached);
-      return cached || fetchPromise;
-    }),
+    fetch(e.request)
+      .then((response) => {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches
+            .open(CACHE)
+            .then((cache) => cache.put(e.request, copy))
+            .catch(() => {});
+        }
+        return response;
+      })
+      .catch(() =>
+        caches.match(e.request).then((cached) => {
+          if (cached) return cached;
+          if (e.request.mode === "navigate")
+            return caches.match("./index.html");
+          return Response.error();
+        }),
+      ),
   );
 });
-</content>
-
