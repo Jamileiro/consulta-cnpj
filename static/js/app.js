@@ -1,6 +1,7 @@
 /**
- * ConsultaCNPJ - Frontend simplificado
- * Máscara CNPJ, validação, consulta API, acordeão dinâmico, tema, export PDF
+ * ConsultaCNPJ - Frontend completo
+ * Máscara CNPJ, validação, consulta API, acordeão dinâmico, tema,
+ * histórico, favoritos, cópia, export PDF
  */
 (function () {
   "use strict";
@@ -21,12 +22,22 @@
   const themeToggle = $("theme-toggle");
   const offlineBadge = $("offline-badge");
   const printCnpj = $("print-cnpj");
+  const historyContainer = $("history-container");
+  const historyList = $("history-list");
+  const favoritesContainer = $("favorites-container");
+  const favoritesList = $("favorites-list");
+  const copyBtn = $("copy-btn");
 
   // =============================================
   // State
   // =============================================
   let currentData = null;
+  let currentCnpj = "";
+  let currentFavorited = false;
   let theme = localStorage.getItem("ccnpj-theme") || "light";
+  const HISTORY_KEY = "ccnpj-history";
+  const FAVORITES_KEY = "ccnpj-favorites";
+  const MAX_HISTORY = 10;
 
   // =============================================
   // Utilitários
@@ -146,29 +157,219 @@
   const isObj = (v) => v !== null && typeof v === "object";
 
   // =============================================
+  // Histórico e Favoritos (localStorage)
+  // =============================================
+  function getHistory() {
+    try {
+      return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function addToHistory(digits, razao) {
+    const history = getHistory().filter((h) => h.digits !== digits);
+    history.unshift({ digits, razao: razao || "—", date: Date.now() });
+    if (history.length > MAX_HISTORY) history.length = MAX_HISTORY;
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    } catch (e) {
+      /* ignore */
+    }
+    renderHistory();
+  }
+
+  function renderHistory() {
+    if (!historyContainer || !historyList) return;
+    const history = getHistory();
+    if (history.length === 0) {
+      historyContainer.classList.add("hidden");
+      return;
+    }
+    historyContainer.classList.remove("hidden");
+    historyList.innerHTML = "";
+    history.forEach((h) => {
+      const li = document.createElement("li");
+      li.className =
+        "flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition";
+      const span = document.createElement("span");
+      span.innerHTML =
+        '<span class="font-mono font-bold">' +
+        formatCnpj(h.digits) +
+        '</span> <span class="text-slate-500 dark:text-slate-400">' +
+        safeText(h.razao) +
+        "</span>";
+      li.appendChild(span);
+      li.addEventListener("click", function () {
+        cnpjInput.value = formatCnpj(h.digits);
+        handleSearch();
+      });
+      historyList.appendChild(li);
+    });
+  }
+
+  function getFavorites() {
+    try {
+      return JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function toggleFavorite() {
+    if (!currentCnpj || !currentData) return;
+    const favorites = getFavorites();
+    const idx = favorites.findIndex((f) => f.digits === currentCnpj);
+    if (idx >= 0) {
+      favorites.splice(idx, 1);
+      currentFavorited = false;
+      showToast("Removido dos favoritos.", "success");
+    } else {
+      const est = currentData.estabelecimento || {};
+      favorites.push({
+        digits: currentCnpj,
+        razao: currentData.razao_social || "—",
+        fantasia: est.nome_fantasia || "",
+        date: Date.now(),
+      });
+      currentFavorited = true;
+      showToast("Adicionado aos favoritos!", "success");
+    }
+    try {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+    } catch (e) {
+      /* ignore */
+    }
+    updateFavoriteBtn();
+    renderFavorites();
+  }
+
+  function updateFavoriteBtn() {
+    const favBtn = $("favorite-btn");
+    if (!favBtn) return;
+    favBtn.textContent = currentFavorited ? "★ Favorito" : "☆ Favoritar";
+    favBtn.classList.toggle("text-amber-500", currentFavorited);
+    favBtn.classList.toggle("dark:text-amber-400", currentFavorited);
+  }
+
+  function renderFavorites() {
+    if (!favoritesContainer || !favoritesList) return;
+    const favorites = getFavorites();
+    if (favorites.length === 0) {
+      favoritesContainer.classList.add("hidden");
+      return;
+    }
+    favoritesContainer.classList.remove("hidden");
+    favoritesList.innerHTML = "";
+    favorites.forEach((f) => {
+      const li = document.createElement("li");
+      li.className =
+        "flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-xs cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 transition";
+      const span = document.createElement("span");
+      const fantasia = f.fantasia ? " — " + safeText(f.fantasia) : "";
+      span.innerHTML =
+        '<span class="font-mono font-bold">' +
+        formatCnpj(f.digits) +
+        "</span> " +
+        safeText(f.razao) +
+        fantasia;
+      li.appendChild(span);
+      li.addEventListener("click", function () {
+        cnpjInput.value = formatCnpj(f.digits);
+        handleSearch();
+      });
+      // Botão remover
+      const rmBtn = document.createElement("button");
+      rmBtn.className =
+        "text-red-500 hover:text-red-700 dark:hover:text-red-400 text-xs font-bold px-1";
+      rmBtn.textContent = "×";
+      rmBtn.title = "Remover dos favoritos";
+      rmBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const favs = getFavorites().filter((x) => x.digits !== f.digits);
+        try {
+          localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
+        } catch (e) {
+          /* ignore */
+        }
+        renderFavorites();
+        if (currentCnpj === f.digits) {
+          currentFavorited = false;
+          updateFavoriteBtn();
+        }
+        showToast("Removido dos favoritos.", "success");
+      });
+      li.appendChild(rmBtn);
+      favoritesList.appendChild(li);
+    });
+  }
+
+  // =============================================
+  // Copiar dados
+  // =============================================
+  function copyData() {
+    if (!currentData || !currentCnpj) {
+      showToast("Faça uma consulta antes de copiar.", "error");
+      return;
+    }
+    const est = currentData.estabelecimento || {};
+    const lines = [
+      "CNPJ: " + formatCnpj(currentCnpj),
+      "Razão Social: " + safeText(currentData.razao_social),
+      "Nome Fantasia: " + safeText(est.nome_fantasia),
+      "Situação: " + (est.situacao_cadastral || "-"),
+      "Endereço: " +
+        [est.tipo_logradouro, est.logradouro, est.numero, est.bairro]
+          .filter(Boolean)
+          .join(" "),
+      "Cidade: " + safeText(est.cidade?.nome),
+      "UF: " + safeText(est.estado?.sigla),
+      "CEP: " + formatCep(String(est.cep || "")),
+      "Telefone: " +
+        [est.ddd1, est.telefone1].filter(Boolean).join(" ") +
+        (est.ddd2 && est.telefone2
+          ? " / " + [est.ddd2, est.telefone2].filter(Boolean).join(" ")
+          : ""),
+      "E-mail: " + safeText(est.email),
+    ].join("\n");
+
+    navigator.clipboard.writeText(lines).then(
+      () => showToast("Dados copiados!", "success"),
+      () => showToast("Erro ao copiar.", "error"),
+    );
+  }
+
+  // =============================================
   // Tema
   // =============================================
   function applyTheme(t) {
     theme = t;
     document.documentElement.classList.toggle("dark", t === "dark");
     localStorage.setItem("ccnpj-theme", t);
-    themeToggle.textContent =
-      t === "light" ? "Usar tema escuro" : "Usar tema claro";
-    themeToggle.setAttribute(
-      "aria-label",
-      t === "light" ? "Ativar tema escuro" : "Ativar tema claro",
+    if (themeToggle) {
+      themeToggle.textContent =
+        t === "light" ? "Usar tema escuro" : "Usar tema claro";
+      themeToggle.setAttribute(
+        "aria-label",
+        t === "light" ? "Ativar tema escuro" : "Ativar tema claro",
+      );
+    }
+  }
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () =>
+      applyTheme(theme === "light" ? "dark" : "light"),
     );
   }
-  themeToggle.addEventListener("click", () =>
-    applyTheme(theme === "light" ? "dark" : "light"),
-  );
   applyTheme(theme);
 
   // =============================================
   // Online/Offline detection
   // =============================================
-  const updateOnline = () =>
-    offlineBadge.classList.toggle("hidden", navigator.onLine);
+  const updateOnline = () => {
+    if (offlineBadge) {
+      offlineBadge.classList.toggle("hidden", navigator.onLine);
+    }
+  };
   window.addEventListener("online", updateOnline);
   window.addEventListener("offline", updateOnline);
   updateOnline();
@@ -176,28 +377,30 @@
   // =============================================
   // Máscara CNPJ
   // =============================================
-  cnpjInput.addEventListener("input", function () {
-    const start = this.selectionStart;
-    const rawDigits = cleanDigits(this.value);
-    if (rawDigits.length === 0) {
-      this.value = "";
-      return;
-    }
-    const oldLength = this.value.length;
-    this.value = formatCnpj(rawDigits);
-    const newLength = this.value.length;
-    let newPos = start + (newLength - oldLength);
-    if (newPos < 0) newPos = 0;
-    if (newPos > this.value.length) newPos = this.value.length;
-    this.setSelectionRange(newPos, newPos);
-  });
+  if (cnpjInput) {
+    cnpjInput.addEventListener("input", function () {
+      const start = this.selectionStart;
+      const rawDigits = cleanDigits(this.value);
+      if (rawDigits.length === 0) {
+        this.value = "";
+        return;
+      }
+      const oldLength = this.value.length;
+      this.value = formatCnpj(rawDigits);
+      const newLength = this.value.length;
+      let newPos = start + (newLength - oldLength);
+      if (newPos < 0) newPos = 0;
+      if (newPos > this.value.length) newPos = this.value.length;
+      this.setSelectionRange(newPos, newPos);
+    });
 
-  cnpjInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSearch();
-    }
-  });
+    cnpjInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleSearch();
+      }
+    });
+  }
 
   // =============================================
   // Toast
@@ -219,9 +422,13 @@
   // UI Helpers
   // =============================================
   function setLoading(isLoading) {
-    loadingContainer.classList.toggle("hidden", !isLoading);
-    consultarBtn.disabled = isLoading;
-    consultarBtn.textContent = isLoading ? "Consultando…" : "Consultar CNPJ";
+    if (loadingContainer) {
+      loadingContainer.classList.toggle("hidden", !isLoading);
+    }
+    if (consultarBtn) {
+      consultarBtn.disabled = isLoading;
+      consultarBtn.textContent = isLoading ? "Consultando…" : "Consultar CNPJ";
+    }
   }
 
   // =============================================
@@ -552,50 +759,70 @@
   // =============================================
   function renderResults(data) {
     currentData = data;
-    resultsSection.classList.remove("hidden");
-    resultsSection.classList.add("fade-in");
+    currentCnpj = cleanDigits(String(data.estabelecimento?.cnpj || ""));
+    const favorites = getFavorites();
+    currentFavorited = favorites.some((f) => f.digits === currentCnpj);
 
-    const total = countFilled(data);
-    fieldCounter.textContent = total;
-    statusMessage.textContent =
-      total + " campos preenchidos em " + Object.keys(data).length + " grupos.";
-
-    const fields = getSummaryFields(data);
-    summaryContainer.innerHTML = "";
-    fields.forEach((f) => {
-      const div = document.createElement("div");
-      div.className =
-        "summary-card rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 slide-up";
-      const label = document.createElement("div");
-      label.className =
-        "text-xs font-bold uppercase tracking-[0.16em] text-slate-400";
-      label.innerHTML = f.label;
-      const value = document.createElement("div");
-      value.className =
-        "mt-3 break-words text-sm font-semibold text-slate-800 dark:text-slate-100";
-      if (f.html) value.innerHTML = f.value;
-      else value.textContent = f.value;
-      div.appendChild(label);
-      div.appendChild(value);
-      summaryContainer.appendChild(div);
-    });
-
-    const detailData = removeSummaryDuplicates(data);
-    detailsContainer.innerHTML = "";
-    if (Object.keys(detailData).length > 0) {
-      detailsContainer.appendChild(renderAccordion(detailData));
-    } else {
-      const p = document.createElement("p");
-      p.className = "text-sm text-slate-500 dark:text-slate-400";
-      p.textContent = "Todos os dados já foram exibidos no resumo acima.";
-      detailsContainer.appendChild(p);
+    if (resultsSection) {
+      resultsSection.classList.remove("hidden");
+      resultsSection.classList.add("fade-in");
     }
 
-    printCnpj.textContent =
-      "CNPJ: " +
-      formatCnpj(String(data.estabelecimento?.cnpj || "")) +
-      " - " +
-      safeText(data.razao_social);
+    const total = countFilled(data);
+    if (fieldCounter) fieldCounter.textContent = total;
+    if (statusMessage) {
+      statusMessage.textContent =
+        total +
+        " campos preenchidos em " +
+        Object.keys(data).length +
+        " grupos.";
+    }
+
+    const fields = getSummaryFields(data);
+    if (summaryContainer) {
+      summaryContainer.innerHTML = "";
+      fields.forEach((f) => {
+        const div = document.createElement("div");
+        div.className =
+          "summary-card rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 slide-up";
+        const label = document.createElement("div");
+        label.className =
+          "text-xs font-bold uppercase tracking-[0.16em] text-slate-400";
+        label.innerHTML = f.label;
+        const value = document.createElement("div");
+        value.className =
+          "mt-3 break-words text-sm font-semibold text-slate-800 dark:text-slate-100";
+        if (f.html) value.innerHTML = f.value;
+        else value.textContent = f.value;
+        div.appendChild(label);
+        div.appendChild(value);
+        summaryContainer.appendChild(div);
+      });
+    }
+
+    const detailData = removeSummaryDuplicates(data);
+    if (detailsContainer) {
+      detailsContainer.innerHTML = "";
+      if (Object.keys(detailData).length > 0) {
+        detailsContainer.appendChild(renderAccordion(detailData));
+      } else {
+        const p = document.createElement("p");
+        p.className = "text-sm text-slate-500 dark:text-slate-400";
+        p.textContent = "Todos os dados já foram exibidos no resumo acima.";
+        detailsContainer.appendChild(p);
+      }
+    }
+
+    if (printCnpj) {
+      printCnpj.textContent =
+        "CNPJ: " +
+        formatCnpj(String(data.estabelecimento?.cnpj || "")) +
+        " - " +
+        safeText(data.razao_social);
+    }
+
+    updateFavoriteBtn();
+    addToHistory(currentCnpj, data.razao_social);
   }
 
   // =============================================
@@ -603,14 +830,14 @@
   // =============================================
   function handleSearch() {
     const digits = cleanDigits(cnpjInput.value);
-    resultsSection.classList.add("hidden");
+    if (resultsSection) resultsSection.classList.add("hidden");
 
     if (!validateCnpj(digits)) {
       showToast(
         "CNPJ inválido. Verifique os dígitos e tente novamente.",
         "error",
       );
-      cnpjInput.focus();
+      if (cnpjInput) cnpjInput.focus();
       return;
     }
 
@@ -659,18 +886,25 @@
   // =============================================
   // Eventos
   // =============================================
-  consultarBtn.addEventListener("click", handleSearch);
+  if (consultarBtn) consultarBtn.addEventListener("click", handleSearch);
 
-  exportPdfBtn.addEventListener("click", () => {
-    if (!currentData) {
-      showToast("Faça uma consulta antes de exportar.", "error");
-      return;
-    }
-    window.print();
-  });
+  if (exportPdfBtn) {
+    exportPdfBtn.addEventListener("click", () => {
+      if (!currentData) {
+        showToast("Faça uma consulta antes de exportar.", "error");
+        return;
+      }
+      window.print();
+    });
+  }
+
+  if (copyBtn) copyBtn.addEventListener("click", copyData);
+
+  const favBtn = $("favorite-btn");
+  if (favBtn) favBtn.addEventListener("click", toggleFavorite);
 
   // =============================================
-  // Restaurar última consulta
+  // Restaurar última consulta + renderizar listas
   // =============================================
   (function restoreLast() {
     try {
@@ -679,12 +913,14 @@
         const cached = sessionStorage.getItem("ccnpj-" + last);
         if (cached) {
           const data = JSON.parse(cached);
-          cnpjInput.value = formatCnpj(last);
+          if (cnpjInput) cnpjInput.value = formatCnpj(last);
           renderResults(data);
         }
       }
     } catch (e) {
       /* silent */
     }
+    renderHistory();
+    renderFavorites();
   })();
 })();

@@ -5,36 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0f172a" />
     <meta name="color-scheme" content="light dark" />
-    <title>Consulta CNPJ</title>
+    <title>Consulta CNPJ Grátis — Dados Cadastrais de Empresas</title>
     <meta
       name="description"
-      content="Consulte dados cadastrais de qualquer CNPJ de forma rápida, segura e responsiva."
+      content="Consulte dados cadastrais de qualquer CNPJ de forma rápida, segura e responsiva. Grátis e sem cadastro."
     />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            boxShadow: {
-              soft: "0 18px 60px rgba(15, 23, 42, 0.08)",
-              "soft-dark": "0 18px 60px rgba(0, 0, 0, 0.4)",
-            },
-            animation: {
-              "fade-in": "fadeIn 0.3s ease-out",
-              "slide-up": "slideUp 0.3s ease-out",
-            },
-            keyframes: {
-              fadeIn: { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
-              slideUp: {
-                "0%": { opacity: "0", transform: "translateY(12px)" },
-                "100%": { opacity: "1", transform: "translateY(0)" },
-              },
-            },
-          },
-        },
-      };
+
+    <!-- Open Graph (WhatsApp, Facebook, Telegram) -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://jamileiro.github.io/consulta-cnpj"
+    />
+    <meta property="og:title" content="Consulta CNPJ Grátis" />
+    <meta
+      property="og:description"
+      content="Consulte dados cadastrais de qualquer CNPJ instantaneamente. Grátis e sem cadastro."
+    />
+    <meta
+      property="og:image"
+      content="https://jamileiro.github.io/consulta-cnpj/static/img/icon-512.png"
+    />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Consulta CNPJ Grátis" />
+    <meta
+      name="twitter:description"
+      content="Consulte dados cadastrais de qualquer CNPJ instantaneamente."
+    />
+
+    <!-- Structured Data (Schema.org) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Consulta CNPJ",
+        "url": "https://jamileiro.github.io/consulta-cnpj",
+        "description": "Consulte dados cadastrais de qualquer CNPJ gratuitamente.",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "All",
+        "browserRequirements": "Requires JavaScript",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "BRL"
+        }
+      }
     </script>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="static/img/icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+
+    <!-- CSS compilado (Tailwind ~15KB) -->
+    <link rel="stylesheet" href="static/css/tailwind.min.css" />
     <link rel="stylesheet" href="static/css/style.css" />
   </head>
   <body
@@ -87,55 +119,86 @@
         </header>
 
         <section class="mb-6 no-print">
-          <div
-            class="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/70 sm:p-6"
-          >
-            <label
-              class="block text-sm font-semibold text-slate-700 dark:text-slate-200"
-            >
-              CNPJ
-              <input
-                type="text"
-                id="cnpj-input"
-                placeholder="Ex: 19.131.243/0001-97"
-                maxlength="18"
-                autocomplete="off"
-                inputmode="numeric"
-                class="mt-2 block w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-sky-900"
-              />
-            </label>
-            <button
-              type="button"
-              id="consultar-btn"
-              class="mt-4 w-full rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-sky-700 disabled:cursor-wait disabled:bg-slate-400 dark:bg-sky-600 dark:hover:bg-sky-500 dark:disabled:bg-slate-600"
-            >
-              Consultar CNPJ
-            </button>
-            <div id="loading-container" class="mt-4 hidden">
+          <div class="grid gap-6 lg:grid-cols-3">
+            <!-- Formulário de consulta -->
+            <div class="lg:col-span-2">
               <div
-                class="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm dark:bg-slate-900"
+                class="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/70 sm:p-6"
               >
-                <div
-                  class="h-8 w-8 animate-spin rounded-full border-4 border-sky-200 border-t-sky-600 dark:border-sky-800 dark:border-t-sky-400"
-                ></div>
-                <div>
-                  <p
-                    class="text-sm font-semibold text-slate-800 dark:text-slate-100"
+                <label
+                  class="block text-sm font-semibold text-slate-700 dark:text-slate-200"
+                >
+                  CNPJ
+                  <input
+                    type="text"
+                    id="cnpj-input"
+                    placeholder="Ex: 19.131.243/0001-97"
+                    maxlength="18"
+                    autocomplete="off"
+                    inputmode="numeric"
+                    class="mt-2 block w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-sky-900"
+                  />
+                </label>
+                <button
+                  type="button"
+                  id="consultar-btn"
+                  class="mt-4 w-full rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-sky-700 disabled:cursor-wait disabled:bg-slate-400 dark:bg-sky-600 dark:hover:bg-sky-500 dark:disabled:bg-slate-600"
+                >
+                  Consultar CNPJ
+                </button>
+                <div id="loading-container" class="mt-4 hidden">
+                  <div
+                    class="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm dark:bg-slate-900"
                   >
-                    Consultando CNPJ&hellip;
-                  </p>
-                  <p class="text-xs text-slate-500 dark:text-slate-400">
-                    Aguarde enquanto buscamos os dados.
-                  </p>
+                    <div
+                      class="h-8 w-8 animate-spin rounded-full border-4 border-sky-200 border-t-sky-600 dark:border-sky-800 dark:border-t-sky-400"
+                    ></div>
+                    <div>
+                      <p
+                        class="text-sm font-semibold text-slate-800 dark:text-slate-100"
+                      >
+                        Consultando CNPJ&hellip;
+                      </p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Aguarde enquanto buscamos os dados.
+                      </p>
+                    </div>
+                  </div>
                 </div>
+                <p
+                  class="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400"
+                >
+                  A pesquisa é feita em tempo real e o resultado pode ser salvo
+                  como PDF pelo navegador.
+                </p>
               </div>
             </div>
-            <p
-              class="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400"
-            >
-              A pesquisa é feita em tempo real e o resultado pode ser salvo como
-              PDF pelo navegador.
-            </p>
+
+            <!-- Sidebar: Histórico e Favoritos -->
+            <div class="space-y-4">
+              <div
+                id="favorites-container"
+                class="hidden rounded-3xl border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-800 dark:bg-amber-950/20"
+              >
+                <h3
+                  class="text-xs font-bold uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400"
+                >
+                  ⭐ Favoritos
+                </h3>
+                <ul id="favorites-list" class="mt-3 space-y-1.5"></ul>
+              </div>
+              <div
+                id="history-container"
+                class="hidden rounded-3xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/30"
+              >
+                <h3
+                  class="text-xs font-bold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400"
+                >
+                  🕐 Histórico
+                </h3>
+                <ul id="history-list" class="mt-3 space-y-1.5"></ul>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -156,6 +219,20 @@
               </p>
             </div>
             <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                id="favorite-btn"
+                class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-amber-400 hover:text-amber-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-amber-500 dark:hover:text-amber-300"
+              >
+                ☆ Favoritar
+              </button>
+              <button
+                type="button"
+                id="copy-btn"
+                class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-400 hover:text-sky-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-sky-500 dark:hover:text-sky-300"
+              >
+                Copiar dados
+              </button>
               <button
                 type="button"
                 id="export-pdf-btn"
@@ -219,6 +296,15 @@
         </footer>
       </main>
     </div>
+
+    <!-- Service Worker (PWA) -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("sw.js").catch(function () {
+          /* silent fail */
+        });
+      }
+    </script>
 
     <script src="static/js/app.js"></script>
   </body>

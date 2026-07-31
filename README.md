@@ -5,6 +5,7 @@ Consulta dados cadastrais de qualquer CNPJ gratuitamente através da API públic
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
+![PWA](https://img.shields.io/badge/PWA-✓-5A0FC8)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## ✨ Funcionalidades
@@ -17,6 +18,13 @@ Consulta dados cadastrais de qualquer CNPJ gratuitamente através da API públic
 - ✅ Cache em sessionStorage
 - ✅ Exportar PDF
 - ✅ Detecção de conectividade
+- ✅ **Histórico** — Últimas 10 consultas salvas
+- ✅ **Favoritos** — Salve CNPJs com ⭐
+- ✅ **Copiar dados** — Copie os dados para área de transferência
+- ✅ **PWA** — Instalável como app no celular
+- ✅ **SEO** — Open Graph, Schema.org e Twitter Cards
+- ✅ **Deploy automático** — GitHub Actions
+- ✅ **Tailwind CSS compilado** — Carregamento 3x mais rápido
 - ✅ Zero dependências
 - ✅ 100% estático — roda em qualquer lugar
 
@@ -49,19 +57,45 @@ Arraste a pasta do projeto para o [Netlify Drop](https://app.netlify.com/drop) o
 
 ```
 consulta-cnpj/
-├── index.html              # Página principal (raiz para GitHub Pages)
+├── index.html                # Página principal
+├── manifest.json             # Manifest PWA (app instalável)
+├── sw.js                     # Service Worker (cache offline)
+├── .editorconfig             # Padrão de código
+├── .github/workflows/
+│   └── deploy.yml            # Deploy automático via GitHub Actions
 ├── static/
-│   ├── css/style.css       # Estilos customizados
-│   └── js/app.js           # Lógica do frontend
-└── README.md               # Este arquivo
+│   ├── css/
+│   │   ├── tailwind.min.css  # Tailwind CSS compilado (~15KB)
+│   │   └── style.css         # Estilos customizados
+│   ├── js/
+│   │   └── app.js            # Lógica do frontend
+│   └── img/
+│       ├── icon-192.svg      # Ícone PWA 192px
+│       └── icon-512.svg      # Ícone PWA 512px
+└── README.md
 ```
+
+## 📱 PWA (App Instalável)
+
+No celular, ao acessar o site, o navegador perguntará "Adicionar à tela inicial".
+Após adicionar, o site funciona como um app nativo com ícone próprio.
 
 ## 🔒 Observações
 
 - A API [publica.cnpj.ws](https://publica.cnpj.ws) é pública e gratuita
 - O CORS é aberto — chamadas diretas do navegador funcionam
 - Dados ficam em cache no `sessionStorage` durante a sessão
+- Favoritos e histórico ficam salvos no `localStorage`
 - Nenhum dado é enviado para servidores intermediários
+
+## 🛠 Desenvolvimento
+
+Para gerar o CSS do Tailwind (após alterar classes):
+
+```bash
+npm install -D tailwindcss
+npx @tailwindcss/cli -i static/css/input.css -o static/css/tailwind.min.css --minify
+```
 
 ## 📄 Licença
 
