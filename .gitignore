@@ -19,5 +19,9 @@ package-lock.json
 tailwind.config.js
 static/css/input.css
 
+# Python venv (geração de ícones)
+.venv-icons/
+
 # Project specific
 TODO.md
+generate_icons.py
