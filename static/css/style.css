@@ -102,6 +102,59 @@ input:focus-visible {
 .dark .summary-card:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
+.summary-card {
+  position: relative;
+}
+.summary-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.summary-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+  flex-shrink: 0;
+  padding: 0;
+  min-height: 0;
+}
+.summary-copy-btn:hover {
+  background: #e0f2fe;
+  border-color: #38bdf8;
+  color: #0284c7;
+}
+.dark .summary-copy-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+.dark .summary-copy-btn:hover {
+  background: #0f172a;
+  border-color: #0ea5e9;
+  color: #38bdf8;
+}
+.summary-value-clickable {
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.summary-value-clickable:hover {
+  color: #0284c7;
+}
+.dark .summary-value-clickable:hover {
+  color: #38bdf8;
+}
 
 .accordion-container {
   display: flex;

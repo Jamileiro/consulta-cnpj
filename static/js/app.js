@@ -26,7 +26,6 @@
   const historyList = $("history-list");
   const favoritesContainer = $("favorites-container");
   const favoritesList = $("favorites-list");
-  const copyBtn = $("copy-btn");
 
   // =============================================
   // State
@@ -305,40 +304,39 @@
   }
 
   // =============================================
-  // Copiar dados
+  // Copiar valor individual
   // =============================================
-  function copyData() {
-    if (!currentData || !currentCnpj) {
-      showToast("Faça uma consulta antes de copiar.", "error");
-      return;
+  function copyTextToClipboard(text) {
+    if (!text || text === "-") return;
+    const cleanText = String(text)
+      .replace(/<[^>]*>/g, "")
+      .trim();
+    if (!cleanText || cleanText === "-") return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(cleanText).then(
+        () => showToast("Valor copiado!", "success"),
+        () => fallbackCopy(cleanText),
+      );
+    } else {
+      fallbackCopy(cleanText);
     }
-    const est = currentData.estabelecimento || {};
-    const lines = [
-      "CNPJ: " + formatCnpj(currentCnpj),
-      "Razão Social: " + safeText(currentData.razao_social),
-      "Nome Fantasia: " + safeText(est.nome_fantasia),
-      "Situação: " + (est.situacao_cadastral || "-"),
-      "Endereço: " +
-        [est.tipo_logradouro, est.logradouro, est.numero, est.bairro]
-          .filter(Boolean)
-          .join(" "),
-      "Cidade: " + safeText(est.cidade?.nome),
-      "UF: " + safeText(est.estado?.sigla),
-      "CEP: " + formatCep(String(est.cep || "")),
-      "Telefone: " +
-        [est.ddd1, est.telefone1].filter(Boolean).join(" ") +
-        (est.ddd2 && est.telefone2
-          ? " / " + [est.ddd2, est.telefone2].filter(Boolean).join(" ")
-          : ""),
-      "E-mail: " + safeText(est.email),
-    ].join("\n");
-
-    navigator.clipboard.writeText(lines).then(
-      () => showToast("Dados copiados!", "success"),
-      () => showToast("Erro ao copiar.", "error"),
-    );
   }
 
+  function fallbackCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      showToast("Valor copiado!", "success");
+    } catch (e) {
+      showToast("Erro ao copiar.", "error");
+    }
+    document.body.removeChild(ta);
+  }
   // =============================================
   // Tema
   // =============================================
@@ -785,16 +783,38 @@
         const div = document.createElement("div");
         div.className =
           "summary-card rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 slide-up";
+        const headerRow = document.createElement("div");
+        headerRow.className = "summary-header-row";
         const label = document.createElement("div");
         label.className =
           "text-xs font-bold uppercase tracking-[0.16em] text-slate-400";
         label.innerHTML = f.label;
+        const copyBtn = document.createElement("button");
+        copyBtn.type = "button";
+        copyBtn.className = "summary-copy-btn";
+        copyBtn.title = "Copiar valor";
+        copyBtn.setAttribute("aria-label", "Copiar valor");
+        copyBtn.innerHTML =
+          '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
         const value = document.createElement("div");
         value.className =
-          "mt-3 break-words text-sm font-semibold text-slate-800 dark:text-slate-100";
+          "mt-3 break-words text-sm font-semibold text-slate-800 dark:text-slate-100 summary-value-clickable";
+        value.title = "Clique para copiar";
         if (f.html) value.innerHTML = f.value;
         else value.textContent = f.value;
-        div.appendChild(label);
+        const plainText = (
+          f.html ? value.textContent : String(f.value || "")
+        ).trim();
+        copyBtn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          copyTextToClipboard(plainText);
+        });
+        value.addEventListener("click", function () {
+          copyTextToClipboard(plainText);
+        });
+        headerRow.appendChild(label);
+        headerRow.appendChild(copyBtn);
+        div.appendChild(headerRow);
         div.appendChild(value);
         summaryContainer.appendChild(div);
       });
@@ -897,8 +917,6 @@
       window.print();
     });
   }
-
-  if (copyBtn) copyBtn.addEventListener("click", copyData);
 
   const favBtn = $("favorite-btn");
   if (favBtn) favBtn.addEventListener("click", toggleFavorite);
