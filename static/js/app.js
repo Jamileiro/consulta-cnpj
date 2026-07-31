@@ -463,7 +463,7 @@
         return span;
       }
       const wrapper = document.createElement("div");
-      wrapper.className = "space-y-2";
+      wrapper.className = "accordion-list space-y-2";
       data.forEach((item, i) => {
         const itemDiv = document.createElement("div");
         itemDiv.className = "accordion-list-item";

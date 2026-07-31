@@ -200,7 +200,9 @@ input:focus-visible {
   padding: 0 18px;
 }
 .accordion-item.is-open .accordion-body {
-  max-height: 2200px;
+  max-height: 60vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0 18px 18px 18px;
 }
 .accordion-body-inner {
@@ -236,6 +238,9 @@ input:focus-visible {
   .accordion-container
   .accordion-item.is-open
   .accordion-body {
+  max-height: 45vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0 14px 14px 14px;
 }
 .accordion-container .accordion-container .accordion-icon {
